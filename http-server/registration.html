@@ -4,53 +4,83 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registration Form</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-        }
-        form {
-            max-width: 400px;
-            margin: 50px auto;
-            padding: 20px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-        }
-        label {
-            display: block;
-            margin-bottom: 8px;
-        }
-        input[type="text"],
-        input[type="email"],
-        input[type="password"] {
-            width: 100%;
-            padding: 8px;
-            margin-bottom: 10px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
-        input[type="submit"] {
-            background-color: #4CAF50;
-            color: white;
-            padding: 10px 15px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-    </style>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-    <h2>Registration Form</h2>
-    <form action="/submit-registration" method="POST">
-        <label for="name">Name:</label>
-        <input type="text" id="name" name="name" required>
+<body class="bg-gray-100 flex flex-col justify-center items-center h-full">
 
-        <label for="email">Email:</label>
-        <input type="email" id="email" name="email" required>
+    <form id="user-form" class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4 w-full max-w-sm">
+        <h2 class="text-xl font-bold mb-4">Form Controls</h2>
 
-        <label for="password">Password:</label>
-        <input type="password" id="password" name="password" required>
+        <div class="mb-4">
+            <label for="name" class="block text-gray-700 text-sm font-bold mb-2">Name</label>
+            <input required type="text" id="name" name="name" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" placeholder="Enter your name">
+        </div>
 
-        <input type="submit" value="Register">
+        <div class="mb-4">
+            <label for="email" class="block text-gray-700 text-sm font-bold mb-2">Email</label>
+            <input required type="email" id="email" name="email" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" placeholder="Enter your email">
+        </div>
+
+        <div class="mb-4">
+            <label for="password" class="block text-gray-700 text-sm font-bold mb-2">Password</label>
+            <input type="password" id="password" name="password" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" placeholder="Enter your password">
+        </div>
+
+        <div class="mb-4">
+            <label for="dob" class="block text-gray-700 text-sm font-bold mb-2">Date of Birth</label>
+            <input required type="date" id="dob" name="dob" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+        </div>
+
+        <div class="mb-4">
+            <label class="block text-gray-700 font-bold">
+                <input type="checkbox" id="acceptTerms" name="acceptTerms" class="mr-2 leading-tight">
+                <span class="text-sm">Accept Terms & Conditions</span>
+            </label>
+        </div>
+
+        <div class="flex items-center justify-between">
+            <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+                Submit
+            </button>
+        </div>
     </form>
+
+    <div class="relative bg-white px-6 pt-10 pb-8 shadow-xl ring-1 ring-gray-900/5 sm:mx:auto sm:rounded-lg sm:px-100 w-full max-w-4xl">
+        <div class="mx-auto">
+            <h2 class="text-3xl text-center font-bold leading-tight mb-6">Entries</h2>
+            <table class="table-auto w-full">
+                <thead>
+                    <tr>
+                        <th class="px-4 py-2">Name</th>
+                        <th class="px-4 py-2">Email</th>
+                        <th class="px-4 py-2">Password</th>
+                        <th class="px-4 py-2">Dob</th>
+                        <th class="px-4 py-2">Accepted terms?</th>
+                    </tr>
+                </thead>
+                <tbody id="user-entries">
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        const email = document.getElementById('email');
+        email.addEventListener('input', () => validate(email));
+
+        const submit = document.getElementById('submit');
+        submit.addEventListener('click', () => validate(email));
+
+        function validate(element){
+            if(element.validity.typeMismatch){
+                element.setCustomValidity("The email is not in the correct format");
+                element.reportValidity();
+            }else{
+                element.setCustomValidity('');
+            }
+        }
+    </script>
+
+    <script src="index.js"></script>
 </body>
 </html>
