@@ -1,3 +1,4 @@
+const today = new Date().toISOString().slice(0, 10);
 const todoList = () => {
     all = []
     const add = (todoItem) => {
