@@ -1,4 +1,4 @@
-// listTodos.js
+//  listTodos.js
 const db = require("./models/index");
 
 const listTodo = async () => {
@@ -8,7 +8,6 @@ const listTodo = async () => {
     console.error(error);
   }
 };
-
 (async () => {
   await listTodo();
 })();
