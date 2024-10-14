@@ -81,27 +81,23 @@ module.exports = (sequelize, DataTypes) => {
     }
 
     displayableString() {
-      const today = new Date().toISOString().split('T')[0]; // Format: YYYY-MM-DD
-      const checkbox = this.completed ? "[x]" : "[ ]"; // Check if the task is complete or incomplete
+  const today = new Date().toISOString().split('T')[0]; // Get today's date in YYYY-MM-DD format
+  const checkbox = this.completed ? "[x]" : "[ ]"; // Checkbox based on completion status
 
-      // Format for completed past-due tasks
-      if (this.completed && this.dueDate < today) {
-        return `${this.id}. ${checkbox} ${this.title} ${this.dueDate}`; // Show the ID, checkbox, title, and due date
-      }
+  // If it's a completed past-due task
+  if (this.completed && this.dueDate < today) {
+    return `${this.id}. ${checkbox} ${this.title} ${this.dueDate}`; // Format for completed past-due tasks
+  }
 
-      // Format for incomplete tasks due today
-      if (this.dueDate === today) {
-        return `${this.id}. ${checkbox} ${this.title}`; // No date for tasks due today
-      }
+  // If it's due today, no need to show the date
+  if (this.dueDate === today) {
+    return `${this.id}. ${checkbox} ${this.title}`; // Format for tasks due today
+  }
 
-      // Format for future incomplete tasks
-      if (!this.completed && this.dueDate > today) {
-        return `${this.id}. ${checkbox} ${this.title} ${this.dueDate}`; // Include due date
-      }
+  // For future tasks, show the date
+  return `${this.id}. ${checkbox} ${this.title} ${this.dueDate}`; // Format for future tasks
+}
 
-      // For overdue and future dates, show the due date
-      return `${this.id}. ${checkbox} ${this.title} ${this.dueDate}`;
-    }
   }
 
   Todo.init(
