@@ -1,59 +1,81 @@
-"use strict";
-const { Model, Op } = require("sequelize"); // Import Op here
+'use strict';
+const { Model } = require('sequelize');
 
 module.exports = (sequelize, DataTypes) => {
   class Todo extends Model {
+    /**
+     * Helper method for defining associations.
+     * This method is not a part of Sequelize lifecycle.
+     * The `models/index` file will call this method automatically.
+     */
     static async addTask(params) {
       return await Todo.create(params);
     }
 
     static async showList() {
-      console.log("My Todo-list\n");
+      console.log('My Todo list \n');
 
-      console.log("Overdue");
-      const overdueTasks = await this.overdue();
-      overdueTasks.forEach((task) => {
-        console.log(task.displayableString().trim());
-      });
-      console.log("\n");
+      // Fetch and print overdue tasks
+      const overdueTasks = await Todo.overdue();
+      if (overdueTasks.length === 0) {
+        console.log('No overdue tasks.');
+      } else {
+        for (const task of overdueTasks) {
+          console.log(task.displayableString().trim());
+        }
+      }
 
-      console.log("Due Today");
-      const dueTodayTasks = await this.dueToday();
-      dueTodayTasks.forEach((task) => {
-        console.log(task.displayableString().trim());
-      });
-      console.log("\n");
+      console.log('\n');
 
-      console.log("Due Later");
-      const dueLaterTasks = await this.dueLater();
-      dueLaterTasks.forEach((task) => {
-        console.log(task.displayableString().trim());
-      });
+      // Fetch and print tasks due today
+      const dueTodayTasks = await Todo.dueToday();
+      if (dueTodayTasks.length === 0) {
+        console.log('No tasks due today.');
+      } else {
+        for (const task of dueTodayTasks) {
+          console.log(task.displayableString().trim());
+        }
+      }
+
+      console.log('\n');
+
+      // Fetch and print tasks due later
+      const dueLaterTasks = await Todo.dueLater();
+      if (dueLaterTasks.length === 0) {
+        console.log('No tasks due later.');
+      } else {
+        for (const task of dueLaterTasks) {
+          console.log(task.displayableString().trim());
+        }
+      }
     }
 
     static async overdue() {
       const today = new Date();
       return await Todo.findAll({
         where: {
-          dueDate: {
-            [Op.lt]: today, // Use Op here
-          },
           completed: false,
+          dueDate: {
+            [sequelize.Op.lt]: today,
+          },
         },
-        order: [["dueDate", "ASC"]],
       });
     }
 
     static async dueToday() {
       const today = new Date();
+      today.setHours(0, 0, 0, 0); // Set to start of the day
+      const tomorrow = new Date(today);
+      tomorrow.setDate(today.getDate() + 1); // Set to tomorrow
+
       return await Todo.findAll({
         where: {
-          dueDate: {
-            [Op.eq]: today.toISOString().split("T")[0], // Use Op here
-          },
           completed: false,
+          dueDate: {
+            [sequelize.Op.gte]: today,
+            [sequelize.Op.lt]: tomorrow,
+          },
         },
-        order: [["dueDate", "ASC"]],
       });
     }
 
@@ -61,12 +83,11 @@ module.exports = (sequelize, DataTypes) => {
       const today = new Date();
       return await Todo.findAll({
         where: {
-          dueDate: {
-            [Op.gt]: today, // Use Op here
-          },
           completed: false,
+          dueDate: {
+            [sequelize.Op.gt]: today,
+          },
         },
-        order: [["dueDate", "ASC"]],
       });
     }
 
@@ -76,34 +97,15 @@ module.exports = (sequelize, DataTypes) => {
         todo.completed = true;
         await todo.save();
       } else {
-        throw new Error(`Todo with ID ${id} not found`);
+        throw new Error(`Todo with ID ${id} not found.`);
       }
     }
 
     displayableString() {
-      const today = new Date().toISOString().split('T')[0]; // Format: YYYY-MM-DD
-      let checkbox = this.completed ? "[x]" : "[ ]"; // Check if the task is complete or incomplete
-    
-      // Format for completed past-due tasks
-      if (this.completed && this.dueDate < today) {
-        // Completed past-due item, show the ID, checkbox, title, and due date
-        return `${this.id}. ${checkbox} ${this.title} ${this.dueDate}`;
-      }
-    
-      // Format for incomplete tasks due today
-      if (this.dueDate === today) {
-        return `${this.id}. ${checkbox} ${this.title}`; // No date for tasks due today
-      }
-    
-      // Format for future incomplete tasks
-      if (!this.completed && this.dueDate > today) {
-        return `${this.id}. ${checkbox} ${this.title} ${this.dueDate}`;
-      }
-    
-      // For overdue and future dates, show the due date
-      return `${this.id}. ${checkbox} ${this.title} ${this.dueDate}`;
+      let checkbox = this.completed ? '[x]' : '[ ]';
+      const date = this.completed || this.dueDate === null ? '' : ` ${this.dueDate}`;
+      return `${this.id}. ${checkbox} ${this.title}${date}`;
     }
-    
   }
 
   Todo.init(
@@ -114,7 +116,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     {
       sequelize,
-      modelName: "Todo",
+      modelName: 'Todo',
     },
   );
 
