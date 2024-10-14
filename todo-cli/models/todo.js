@@ -1,5 +1,5 @@
-"use strict";
-const { Model, Op } = require("sequelize");
+'use strict';
+const { Model, Op } = require('sequelize');
 
 module.exports = (sequelize, DataTypes) => {
   class Todo extends Model {
@@ -8,23 +8,23 @@ module.exports = (sequelize, DataTypes) => {
     }
 
     static async showList() {
-      console.log("My Todo-list\n");
+      console.log('My Todo list \n');
 
-      console.log("Overdue");
+      console.log('Overdue');
       const overdueTasks = await this.overdue();
       overdueTasks.forEach((task) => {
         console.log(task.displayableString().trim());
       });
-      console.log("\n");
+      console.log('\n');
 
-      console.log("Due Today");
+      console.log('Due Today');
       const dueTodayTasks = await this.dueToday();
       dueTodayTasks.forEach((task) => {
         console.log(task.displayableString().trim());
       });
-      console.log("\n");
+      console.log('\n');
 
-      console.log("Due Later");
+      console.log('Due Later');
       const dueLaterTasks = await this.dueLater();
       dueLaterTasks.forEach((task) => {
         console.log(task.displayableString().trim());
@@ -32,44 +32,36 @@ module.exports = (sequelize, DataTypes) => {
     }
 
     static async overdue() {
-      const today = new Date();
-      const todayString = today.toISOString().split("T")[0]; // YYYY-MM-DD
+      const today = new Date().toISOString().split("T")[0]; // Format: YYYY-MM-DD
       return await Todo.findAll({
         where: {
           dueDate: {
-            [Op.lt]: todayString, // Use formatted date
+            [Op.lt]: today,
           },
-          completed: false,
         },
-        order: [["dueDate", "ASC"]],
+        order: [['dueDate', 'ASC']],
       });
     }
 
     static async dueToday() {
-      const today = new Date();
-      const todayString = today.toISOString().split("T")[0]; // YYYY-MM-DD
+      const today = new Date().toISOString().split("T")[0]; // Format: YYYY-MM-DD
       return await Todo.findAll({
         where: {
-          dueDate: {
-            [Op.eq]: todayString, // Use formatted date
-          },
-          completed: false,
+          dueDate: today,
         },
-        order: [["dueDate", "ASC"]],
+        order: [['dueDate', 'ASC']],
       });
     }
 
     static async dueLater() {
-      const today = new Date();
-      const todayString = today.toISOString().split("T")[0]; // YYYY-MM-DD
+      const today = new Date().toISOString().split("T")[0]; // Format: YYYY-MM-DD
       return await Todo.findAll({
         where: {
           dueDate: {
-            [Op.gt]: todayString, // Use formatted date
+            [Op.gt]: today,
           },
-          completed: false,
         },
-        order: [["dueDate", "ASC"]],
+        order: [['dueDate', 'ASC']],
       });
     }
 
@@ -84,26 +76,26 @@ module.exports = (sequelize, DataTypes) => {
     }
 
     displayableString() {
-      const today = new Date().toISOString().split('T')[0]; // Format: YYYY-MM-DD
-      const checkbox = this.completed ? "[x]" : "[ ]"; // Check if the task is complete or incomplete
-
-      // Format for completed past-due tasks
-      if (this.completed && this.dueDate < today) {
-        return `${this.id}. ${checkbox} ${this.title} ${this.dueDate}`; // Show the ID, checkbox, title, and due date
+      const checkbox = this.completed ? '[x]' : '[ ]';
+      const dueDateString = this.completed && this.dueDate < new Date().toISOString().split("T")[0] ? this.dueDate : '';
+      
+      // For completed past-due tasks
+      if (this.completed && this.dueDate < new Date().toISOString().split("T")[0]) {
+        return `${this.id}. ${checkbox} ${this.title} ${dueDateString}`.trim(); // Format: ID. [x] TITLE DUE_DATE
       }
 
-      // Format for incomplete tasks due today
-      if (this.dueDate === today) {
+      // For incomplete tasks due today
+      if (this.dueDate === new Date().toISOString().split("T")[0]) {
         return `${this.id}. ${checkbox} ${this.title}`; // No date for tasks due today
       }
 
       // Format for future incomplete tasks
-      if (!this.completed && this.dueDate > today) {
+      if (!this.completed && this.dueDate > new Date().toISOString().split("T")[0]) {
         return `${this.id}. ${checkbox} ${this.title} ${this.dueDate}`; // Include due date
       }
 
       // For overdue and future dates, show the due date
-      return `${this.id}. ${checkbox} ${this.title} ${this.dueDate}`;
+      return `${this.id}. ${checkbox} ${this.title} ${this.dueDate}`; 
     }
   }
 
@@ -115,7 +107,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     {
       sequelize,
-      modelName: "Todo",
+      modelName: 'Todo',
     },
   );
 
