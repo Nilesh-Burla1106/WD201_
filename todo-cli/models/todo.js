@@ -81,14 +81,14 @@ module.exports = (sequelize, DataTypes) => {
     }
 
     displayableString() {
+      const today = new Date().toISOString().split('T')[0]; // Format: YYYY-MM-DD
       let checkbox = this.completed ? "[x]" : "[ ]";
       let displayString = `${this.id}. ${checkbox} ${this.title}`;
-    
+      
       // Format for completed past-due tasks
-      const today = new Date().toISOString().split('T')[0]; // Format: YYYY-MM-DD
       if (this.completed && this.dueDate < today) {
-        // Completed past-due item
-        return `${this.id}. [x] ${this.title} ${this.dueDate}`;
+        // Completed past-due item - No change needed here
+        return `${this.id}. [x] ${this.title} ${this.dueDate}`; // Change highlighted
       }
     
       // Format for incomplete tasks due today or later
@@ -97,8 +97,8 @@ module.exports = (sequelize, DataTypes) => {
       }
     
       // For overdue and future dates, show the due date
-      return `${displayString} ${this.dueDate}`;
-    } 
+      return `${displayString} ${this.dueDate}`; // This line is already correct
+    }
   }
 
   Todo.init(
