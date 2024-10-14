@@ -84,10 +84,16 @@ module.exports = (sequelize, DataTypes) => {
       let checkbox = this.completed ? "[x]" : "[ ]";
       let displayString = `${this.id}. ${checkbox} ${this.title}`;
     
-      // Check if the task is due today and completed
+      // Format for completed past-due tasks
       const today = new Date().toISOString().split('T')[0]; // Format: YYYY-MM-DD
+      if (this.dueDate < today) {
+        // Completed past-due item
+        return `${this.id}. [x] ${this.title} ${this.dueDate}`;
+      }
+    
+      // Format for incomplete tasks due today or later
       if (this.dueDate === today) {
-        return `${this.id}. ${checkbox} ${this.title}`; // Date should not be shown for today
+        return `${this.id}. ${checkbox} ${this.title}`; // No date for today's tasks
       }
     
       // For overdue and future dates, show the due date
