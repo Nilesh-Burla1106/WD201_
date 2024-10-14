@@ -85,19 +85,21 @@ module.exports = (sequelize, DataTypes) => {
       let checkbox = this.completed ? "[x]" : "[ ]";
       let displayString = `${this.id}. ${checkbox} ${this.title}`;
       
+      const formattedDueDate = this.dueDate.toISOString().split('T')[0];
+
       // Format for completed past-due tasks
-      if (this.completed && this.dueDate < today) {
+      if (this.completed && formattedDueDate < today) {
         // Completed past-due item - No change needed here
-        return `${this.id}. [x] ${this.title} ${this.dueDate}`; // Change highlighted
+        return `${this.id}. [x] ${this.title} ${formattedDueDate}`; // Change highlighted
       }
     
       // Format for incomplete tasks due today or later
-      if (this.dueDate === today) {
+      if (formattedDueDate === today) {
         return `${this.id}. ${checkbox} ${this.title}`; // No date for today's tasks
       }
     
       // For overdue and future dates, show the due date
-      return `${displayString} ${this.dueDate}`; // This line is already correct
+      return `${displayString} ${formattedDueDate}`; // This line is already correct
     }
   }
 
