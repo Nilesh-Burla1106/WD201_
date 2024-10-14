@@ -86,7 +86,7 @@ module.exports = (sequelize, DataTypes) => {
     
       // Format for completed past-due tasks
       const today = new Date().toISOString().split('T')[0]; // Format: YYYY-MM-DD
-      if (this.dueDate < today) {
+      if (this.completed && this.dueDate < today) {
         // Completed past-due item
         return `${this.id}. [x] ${this.title} ${this.dueDate}`;
       }
@@ -98,8 +98,7 @@ module.exports = (sequelize, DataTypes) => {
     
       // For overdue and future dates, show the due date
       return `${displayString} ${this.dueDate}`;
-    }
-    
+    } 
   }
 
   Todo.init(
