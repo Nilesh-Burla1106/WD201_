@@ -18,6 +18,29 @@ describe("Todo test suite", () => {
 
     // Existing tests...
 
+    test("Fetch all todos", async () => {
+        // Create a few Todos to test the fetching functionality
+        await agent.post('/todos').send({
+            title: 'Buy milk',
+            dueDate: new Date().toISOString(),
+            completed: false,
+        });
+        await agent.post('/todos').send({
+            title: 'Read a book',
+            dueDate: new Date().toISOString(),
+            completed: false,
+        });
+
+        // Fetch all Todos
+        const response = await agent.get('/todos');
+        console.log("Fetch all Todos response:", response.text); // Log the fetch response
+
+        expect(response.statusCode).toBe(200); // Check if the status code is 200
+        const todos = JSON.parse(response.text); // Parse the response text to JSON
+        expect(Array.isArray(todos)).toBe(true); // Check if the response is an array
+        expect(todos.length).toBeGreaterThan(0); // Ensure at least one Todo is returned
+    });
+
     test("Delete a todo by ID", async () => {
         // Create a Todo to delete
         const createResponse = await agent.post('/todos').send({
