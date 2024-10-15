@@ -1,62 +1,46 @@
-const express = require('express');
-const app = express();
-const bodyParser = require('body-parser');
-app.use(bodyParser.json());
+const request = require('supertest');
+const db = require('../models/index');
+const app = require('../app');
 
-const { Todo } = require('./models');
+let server, agent;
 
-// Fetch all To-Dos from the database
-app.get('/todos', async (request, response) => {
-    console.log("Fetching all todos");
-    try {
-        const todos = await Todo.findAll(); // Fetch all To-Dos from the database
-        return response.json(todos); // Return the list of To-Dos as JSON
-    } catch (error) {
-        console.log(error);
-        return response.status(500).json({ error: "Failed to fetch todos" });
-    }
-});
+describe("Todo test suite", () => {
+    beforeAll(async () => {
+        await db.sequelize.sync({ force: true });
+        server = app.listen(3000, () => {});
+        agent = request.agent(server);
+    });
 
-// Create a new To-Do
-app.post('/todos', async (request, response) => {
-    console.log("Creating a todo", request.body);
-    try {
-        const todo = await Todo.addTodo({
-            title: request.body.title,
-            dueDate: request.body.dueDate,
+    afterAll(async () => {
+        await db.sequelize.close();
+        server.close();
+    });
+
+    // Existing tests...
+
+    test("Delete a todo by ID", async () => {
+        // Create a Todo to delete
+        const createResponse = await agent.post('/todos').send({
+            title: 'Buy milk',
+            dueDate: new Date().toISOString(),
             completed: false,
         });
-        return response.json(todo);
-    } catch (error) {
-        console.log(error);
-        return response.status(422).json(error);
-    }
+        const createdTodo = JSON.parse(createResponse.text);
+        const todoID = createdTodo.id;
+    
+        // Log the created Todo ID
+        console.log("Created Todo ID for deletion:", todoID);
+    
+        // Delete the created Todo
+        const deleteResponse = await agent.delete(`/todos/${todoID}`);
+        console.log("Delete response:", deleteResponse.text); // Log the delete response
+        expect(deleteResponse.statusCode).toBe(200);
+        expect(deleteResponse.text).toBe('true'); // Expecting true for successful deletion
+    
+        // Verify that the Todo is deleted
+        const verifyResponse = await agent.get(`/todos/${todoID}`);
+        console.log("Verify response for deleted Todo:", verifyResponse.statusCode); // Log the verify response
+        expect(verifyResponse.statusCode).toBe(404); // Not found, since it should be deleted
+    }, 10000); // Increase the timeout to 10 seconds
+    
 });
-
-// Mark a To-Do as completed
-app.put('/todos/:id/markAsCompleted', async (request, response) => {
-    console.log("We have to update a todo with id:", request.params.id);
-    try {
-        const todo = await Todo.findByPk(request.params.id);
-        const updatedTodo = await todo.markAsCompleted();
-        return response.json(updatedTodo);
-    } catch (error) {
-        console.log(error);
-        return response.status(422).json(error);
-    }
-});
-
-// Delete a To-Do by ID
-app.delete("/todos/:id", async function (request, response) {
-    console.log("We have to delete a Todo with ID: ", request.params.id);
-    try {
-        const result = await Todo.destroy({ where: { id: request.params.id } });
-        console.log(`Deletion result for ID ${request.params.id}:`, result); // Log the deletion result
-        response.send(result > 0); // Send true if a Todo was deleted
-    } catch (error) {
-        console.log("Error deleting Todo:", error);
-        return response.status(500).json({ error: "Failed to delete todo" });
-    }
-});
-
-module.exports = app;
